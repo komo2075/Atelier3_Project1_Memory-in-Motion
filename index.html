@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f2ed" />
+  <title>Memory in Motion — OCAD</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div id="scene" aria-label="Interactive 3D campus model"></div>
+  <div id="point-layer" aria-label="Memory locations"></div>
+  <header class="topbar">
+    <div><div class="eyebrow">OCAD UNIVERSITY · MEMORY ARCHIVE</div><h1>Memory in Motion<span class="dot">.</span></h1></div>
+    <button id="help-button" class="round-btn" aria-label="Instructions">?</button>
+  </header>
+  <div class="bottom-bar">
+    <div class="instructions" id="instructions">Drag to explore · Scroll to zoom · Tap a memory</div>
+    <div class="controls"><button id="motion-button" class="pill" type="button">Enable motion</button><button id="reset-button" class="pill secondary" type="button">Reset view</button></div>
+  </div>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="memory-title">
+    <div class="backdrop" data-close="true"></div>
+    <article class="memory-card">
+      <button id="close-modal" class="close" aria-label="Close">×</button>
+      <div class="eyebrow" id="memory-label">MEMORY</div>
+      <h2 id="memory-title"></h2><div class="date" id="memory-date"></div>
+      <div id="image-area" class="image-area"><img id="memory-image" alt=""/><div id="image-placeholder" class="image-placeholder">Add your photo in assets/memories</div></div>
+      <div id="image-controls" class="image-controls"><button id="prev-image" aria-label="Previous photo">←</button><span id="image-counter"></span><button id="next-image" aria-label="Next photo">→</button></div>
+      <p id="memory-text"></p>
+    </article>
+  </div>
+  <div id="help-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="backdrop" data-close-help="true"></div><article class="memory-card help-card"><button id="close-help" class="close" aria-label="Close">×</button><div class="eyebrow">HOW TO EXPLORE</div><h2 id="help-title">Find your memories</h2><p>Rotate the campus with your mouse or touch. On a supported phone, tap Enable motion and rotate your device to explore. Tap a glowing dot to open a memory. Reset view recenters the camera.</p><p>Developers: use <code>?debug=true</code> to click the ground and copy coordinates. Configure points in <code>js/config/points.js</code> and content in <code>js/config/memories.js</code>.</p></article>
+  </div>
+  <div id="debug-panel" class="debug-panel hidden"><strong>DEBUG · position picker</strong><p>Click the ground or model to copy a world position.</p><code id="debug-coords">Waiting for click…</code></div>
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}
+  </script>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
