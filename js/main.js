@@ -1447,7 +1447,6 @@ if (motionEnabled) {
   }
 
   renderer.render(scene, camera);
-}
 
 draw();
 
