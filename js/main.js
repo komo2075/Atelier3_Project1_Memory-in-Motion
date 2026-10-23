@@ -1,3 +1,5 @@
+console.log("MEMORY IN MOTION - MIC TEST VERSION 2");
+
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -990,6 +992,14 @@ async function startBlow() {
     }
 
     microphoneStream = stream;
+
+
+    const track = stream.getAudioTracks()[0];
+
+    console.log("MIC DEVICE:", track.label);
+    console.log("MIC SETTINGS:", track.getSettings());
+    console.log("MIC MUTED:", track.muted);
+
 
     audioContext = new (
       window.AudioContext ||
