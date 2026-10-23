@@ -80,3 +80,65 @@ function draw(){requestAnimationFrame(draw);if(!motionEnabled)controls.update();
  for(const {button,world} of pointEls){const v=world.clone().project(camera);const front=world.clone().sub(camera.position).dot(camera.getWorldDirection(new THREE.Vector3()))>0;const visible=front&&v.z>-1&&v.z<1&&Math.abs(v.x)<1.08&&Math.abs(v.y)<1.08;button.style.display=visible?'grid':'none';if(visible){button.style.left=`${(v.x*.5+.5)*w}px`;button.style.top=`${(-v.y*.5+.5)*h}px`}}
  renderer.render(scene,camera)}draw();
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+
+// =====================================
+// Memory Points Visibility Toggle
+// =====================================
+
+const togglePointsButton =
+  document.getElementById("toggle-points");
+
+const pointLayer =
+  document.getElementById("point-layer");
+
+const eyeIcon =
+  document.getElementById("eye-icon");
+
+let pointsVisible = true;
+
+togglePointsButton.addEventListener("click", () => {
+
+  pointsVisible = !pointsVisible;
+
+  pointLayer.classList.toggle(
+    "points-hidden",
+    !pointsVisible
+  );
+
+  if (pointsVisible) {
+
+    // Eye open
+    eyeIcon.innerHTML = `
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
+      <circle cx="12" cy="12" r="3"/>
+    `;
+
+    togglePointsButton.title = "Hide memory points";
+    togglePointsButton.setAttribute(
+      "aria-label",
+      "Hide memory points"
+    );
+
+  } else {
+
+    // Eye closed
+    eyeIcon.innerHTML = `
+      <path d="M3 3l18 18"/>
+      <path d="M10.6 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a15 15 0 0 1-4 4.7"/>
+      <path d="M6.2 6.3C3.5 8.2 2 12 2 12s3.5 7 10 7c1.6 0 3-.4 4.2-1"/>
+      <path d="M10 10a3 3 0 0 0 4 4"/>
+    `;
+
+    togglePointsButton.title = "Show memory points";
+    togglePointsButton.setAttribute(
+      "aria-label",
+      "Show memory points"
+    );
+  }
+
+  togglePointsButton.setAttribute(
+    "aria-pressed",
+    String(!pointsVisible)
+  );
+});

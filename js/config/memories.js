@@ -3,9 +3,11 @@
 // Empty images arrays show a helpful placeholder, so the demo works without photos.
 export const memories = {
   memory01: {
-    title: 'The First Day', date: 'September 2024',
-    images: [], // e.g. ['assets/memories/001/photo1.jpg', 'assets/memories/001/photo2.jpg']
-    text: 'A placeholder for a photo and a memory from my first days at OCAD.'
+    title: 'Season windows', date: '//',
+    images: ["./assets/memories/001/photo1.jpg",
+      "./assets/memories/001/photo2.jpg",
+      "./assets/memories/001/photo3.jpg"], // e.g. ['assets/memories/001/photo1.jpg', 'assets/memories/001/photo2.jpg']
+    text: 'My time and seasons in OCAD Windows. A placeholder for a candid moment with friends on campus.'
   },
   memory02: {
     title: 'With Friends', date: '2025',
@@ -55,7 +57,36 @@ memory06: {
   ],
 
   text: "We spent the day together at OCAD. These photos remind me of the ordinary moments we shared."
-}
+},
+
+
+
+
+// Special interactions memories
+  memoryS01: {
+    title: "A Hidden Memory",
+    date: "October 2026",
+
+    images: [
+      "./assets/memories/s01/photo1.jpg"
+    ],
+
+    text: "A memory waiting to be discovered."
+  },
+
+  memoryS02: {
+    title: "Before and After",
+    date: "October 2026",
+
+    images: [
+      "./assets/memories/s02/before.jpg",
+      "./assets/memories/s02/after.jpg"
+    ],
+
+    text: "The same place holds different moments."
+  }
+
+
 
 
 };

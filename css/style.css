@@ -1,1 +1,493 @@
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#292b2c;background:#f4f2ed}*{box-sizing:border-box}body{margin:0;overflow:hidden}button{font:inherit;cursor:pointer}#scene,#point-layer{position:fixed;inset:0}#scene canvas{display:block;width:100%;height:100%}#point-layer{pointer-events:none;overflow:hidden}.topbar{position:fixed;top:0;left:0;right:0;padding:clamp(22px,4vw,52px);display:flex;justify-content:space-between;align-items:start;pointer-events:none}.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:750;color:#8e8b84}.topbar h1{font-size:clamp(24px,3vw,40px);font-weight:550;letter-spacing:-.05em;margin:8px 0}.dot{color:#c8845d}.round-btn{pointer-events:auto;width:39px;height:39px;border:1px solid #ddd8ce;background:#fffcf6b8;border-radius:50%;font-size:19px}.bottom-bar{position:fixed;bottom:0;left:0;right:0;padding:22px clamp(22px,4vw,52px) max(26px,env(safe-area-inset-bottom));display:flex;align-items:end;justify-content:space-between;gap:20px;pointer-events:none}.instructions{font-size:12px;color:#8b8983;max-width:260px}.controls{display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;justify-content:end}.pill{background:#2f3332;color:white;border:0;border-radius:30px;padding:12px 17px;font-size:12px}.pill.secondary{background:#ffffffbf;color:#383a39;border:1px solid #e3dfd6}.memory-point{position:absolute;pointer-events:auto;transform:translate(-50%,-50%);width:31px;height:31px;border:1px solid #fff9;border-radius:50%;background:#d79a70b0;box-shadow:0 0 0 7px #d79a7029,0 3px 15px #9d72524d;display:grid;place-items:center;transition:opacity .15s,scale .2s}.memory-point::after{content:"";width:8px;height:8px;border-radius:50%;background:white}.memory-point:hover,.memory-point:focus-visible{scale:1.25;outline:2px solid #fff}.modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px}.hidden{display:none!important}.backdrop{position:absolute;inset:0;background:#222a2bb0;backdrop-filter:blur(7px)}.memory-card{position:relative;width:min(480px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fcfaf6;border-radius:13px;padding:clamp(22px,4vw,34px);box-shadow:0 24px 90px #0003}.close{position:absolute;right:18px;top:14px;border:0;background:none;font-size:27px;color:#777}.memory-card h2{font-size:clamp(24px,4vw,32px);font-weight:550;letter-spacing:-.035em;margin:13px 28px 4px 0}.date{color:#8a8984;font-size:12px;margin-bottom:22px}.image-area{background:#e7e3dc;aspect-ratio:4/3;display:grid;place-items:center;overflow:hidden;border-radius:4px}.image-area img{width:100%;height:100%;object-fit:contain;display:none}.image-placeholder{text-align:center;padding:25px;color:#9a958c;font-size:13px;max-width:230px;line-height:1.6}.image-controls{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;font-size:12px;color:#89857d}.image-controls button{border:0;background:none;font-size:20px;color:#555}.memory-card p{font-size:14px;line-height:1.85;color:#555b58;white-space:pre-wrap}.status{position:fixed;left:50%;bottom:105px;transform:translateX(-50%);font-size:12px;background:#2e3231;color:white;border-radius:8px;padding:10px 14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;text-align:center;max-width:85vw}.status.show{opacity:1}.debug-panel{position:fixed;top:120px;right:22px;background:#fffef4ed;border:1px solid #ddd;padding:15px;max-width:270px;border-radius:8px;font-size:12px;z-index:4}.debug-panel p{color:#777}.debug-panel code{overflow-wrap:anywhere}.help-card{max-width:520px}@media(max-width:650px){.bottom-bar{align-items:start;flex-direction:column}.controls{justify-content:start}.topbar{padding-top:max(24px,env(safe-area-inset-top))}.memory-card{max-height:90dvh}}
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui,
+    -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  color: #292b2c;
+  background: #f4f2ed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* =========================
+   3D SCENE
+========================= */
+
+#scene,
+#point-layer {
+  position: fixed;
+  inset: 0;
+}
+
+#scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#point-layer {
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#point-layer.points-hidden {
+  display: none;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  padding: clamp(22px, 4vw, 52px);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  pointer-events: none;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 750;
+  color: #8e8b84;
+}
+
+.topbar h1 {
+  font-size: clamp(24px, 3vw, 40px);
+  font-weight: 550;
+  letter-spacing: -0.05em;
+  margin: 8px 0;
+}
+
+.dot {
+  color: #c8845d;
+}
+
+.round-btn {
+  pointer-events: auto;
+  width: 39px;
+  height: 39px;
+  border: 1px solid #ddd8ce;
+  background: #fffcf6b8;
+  border-radius: 50%;
+  font-size: 19px;
+}
+
+/* =========================
+   RIGHT CORNER BUTTONS
+========================= */
+
+.right-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  z-index: 100;
+}
+
+#toggle-points {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* =========================
+   BOTTOM BAR
+========================= */
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  padding:
+    22px
+    clamp(22px, 4vw, 52px)
+    max(26px, env(safe-area-inset-bottom));
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+
+  pointer-events: none;
+}
+
+.instructions {
+  font-size: 12px;
+  color: #8b8983;
+  max-width: 260px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pill {
+  background: #2f3332;
+  color: white;
+  border: 0;
+  border-radius: 30px;
+  padding: 12px 17px;
+  font-size: 12px;
+}
+
+.pill.secondary {
+  background: #ffffffbf;
+  color: #383a39;
+  border: 1px solid #e3dfd6;
+}
+
+/* =========================
+   MEMORY POINTS
+========================= */
+
+.memory-point {
+  position: absolute;
+  pointer-events: auto;
+
+  transform: translate(-50%, -50%);
+
+  width: 31px;
+  height: 31px;
+
+  border: 1px solid #fff9;
+  border-radius: 50%;
+
+  background: #d79a70b0;
+
+  box-shadow:
+    0 0 0 7px #d79a7029,
+    0 3px 15px #9d72524d;
+
+  display: grid;
+  place-items: center;
+
+  transition:
+    opacity 0.15s,
+    scale 0.2s;
+}
+
+.memory-point::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+
+.memory-point:hover,
+.memory-point:focus-visible {
+  scale: 1.25;
+  outline: 2px solid #fff;
+}
+
+/* Special memory points */
+
+.memory-point.special,
+.memory-point[data-interaction="blow"],
+.memory-point[data-interaction="shake"] {
+  background: #4285d8c9;
+
+  box-shadow:
+    0 0 0 7px #4285d82b,
+    0 3px 15px #2b609c66;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+
+  background: #222a2bb0;
+  backdrop-filter: blur(7px);
+}
+
+/* =========================
+   MEMORY CARD
+========================= */
+
+.memory-card {
+  position: relative;
+
+  width: min(480px, 100%);
+  max-height: calc(100dvh - 40px);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background: #fcfaf6;
+  border-radius: 13px;
+
+  padding: clamp(22px, 4vw, 34px);
+
+  box-shadow: 0 24px 90px #0003;
+}
+
+.close {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+
+  border: 0;
+  background: none;
+
+  font-size: 27px;
+  color: #777;
+}
+
+.memory-card h2 {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 550;
+  letter-spacing: -0.035em;
+
+  margin: 13px 28px 4px 0;
+}
+
+.date {
+  color: #8a8984;
+  font-size: 12px;
+  margin-bottom: 22px;
+}
+
+/* =========================
+   MEMORY PHOTO AREA
+========================= */
+
+.image-area {
+  width: 100%;
+  height: min(55dvh, 500px);
+
+  background: #e7e3dc;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+/*
+  Images retain their original proportions.
+
+  Landscape: gray space above and below.
+  Portrait: gray space on the left and right.
+*/
+
+.image-area img {
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  object-fit: contain;
+  object-position: center;
+
+  display: none;
+}
+
+/* Placeholder for missing images */
+
+.image-placeholder {
+  text-align: center;
+  padding: 25px;
+
+  color: #9a958c;
+  font-size: 13px;
+
+  max-width: 230px;
+  line-height: 1.6;
+}
+
+/* =========================
+   IMAGE CONTROLS
+========================= */
+
+.image-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 2px;
+
+  font-size: 12px;
+  color: #89857d;
+}
+
+.image-controls button {
+  border: 0;
+  background: none;
+
+  font-size: 20px;
+  color: #555;
+}
+
+/* =========================
+   MEMORY TEXT
+========================= */
+
+.memory-card p {
+  font-size: 14px;
+  line-height: 1.85;
+
+  color: #555b58;
+  white-space: pre-wrap;
+}
+
+/* =========================
+   STATUS MESSAGE
+========================= */
+
+.status {
+  position: fixed;
+  left: 50%;
+  bottom: 105px;
+
+  transform: translateX(-50%);
+
+  font-size: 12px;
+  background: #2e3231;
+  color: white;
+
+  border-radius: 8px;
+  padding: 10px 14px;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.2s;
+
+  z-index: 10;
+  text-align: center;
+  max-width: 85vw;
+}
+
+.status.show {
+  opacity: 1;
+}
+
+/* =========================
+   DEBUG PANEL
+========================= */
+
+.debug-panel {
+  position: fixed;
+  top: 120px;
+  right: 22px;
+
+  background: #fffef4ed;
+  border: 1px solid #ddd;
+
+  padding: 15px;
+  max-width: 270px;
+
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 4;
+}
+
+.debug-panel p {
+  color: #777;
+}
+
+.debug-panel code {
+  overflow-wrap: anywhere;
+}
+
+/* =========================
+   HELP CARD
+========================= */
+
+.help-card {
+  max-width: 520px;
+}
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
+@media (max-width: 650px) {
+
+  .bottom-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .controls {
+    justify-content: flex-start;
+  }
+
+  .topbar {
+    padding-top: max(
+      24px,
+      env(safe-area-inset-top)
+    );
+  }
+
+  .right-controls {
+    top: max(
+      20px,
+      env(safe-area-inset-top)
+    );
+    right: 20px;
+  }
+
+  .memory-card {
+    max-height: 90dvh;
+    overflow-y: auto;
+  }
+
+  .image-area {
+    height: min(50dvh, 450px);
+  }
+}

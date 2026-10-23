@@ -12,7 +12,42 @@
   <div id="point-layer" aria-label="Memory locations"></div>
   <header class="topbar">
     <div><div class="eyebrow">OCAD UNIVERSITY · MEMORY ARCHIVE</div><h1>Memory in Motion<span class="dot">.</span></h1></div>
-    <button id="help-button" class="round-btn" aria-label="Instructions">?</button>
+   
+   
+   
+    <div class="right-controls">
+  <button
+    id="help-button"
+    class="round-btn"
+    aria-label="Instructions"
+  >?</button>
+
+  <button
+    id="toggle-points"
+    class="round-btn"
+    aria-label="Hide memory points"
+    title="Hide memory points"
+    aria-pressed="false"
+  >
+    <svg
+      id="eye-icon"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
+</div>
+
+
+
   </header>
   <div class="bottom-bar">
     <div class="instructions" id="instructions">Drag to explore · Scroll to zoom · Tap a memory</div>
