@@ -301,8 +301,9 @@ function onLandscapeMotion(event) {
 
     physicalLandscape = true;
 
+    //1.4.3 version
     // Detect left or right rotation
-    landscapeDirection = x > 0 ? 1 : -1;
+    landscapeDirection = x > 0 ? -1 : 1;
 
 
     //1.4.2 version
