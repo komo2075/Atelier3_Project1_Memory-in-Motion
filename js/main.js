@@ -262,6 +262,14 @@ let landscapeReady = false;
 let physicalLandscape = false;
 let landscapeSensorActive = false;
 
+//1.4.1 version
+let landscapeDirection = 0;
+// 0 = portrait
+// 1 = landscape right
+// -1 = landscape left
+
+
+//1.4.1 version
 // Detect physical orientation using gravity.
 // Works even when screen rotation is locked.
 function onLandscapeMotion(event) {
@@ -282,20 +290,36 @@ function onLandscapeMotion(event) {
     return;
   }
 
-  const x = Math.abs(gravity.x);
-  const y = Math.abs(gravity.y);
+  const x = gravity.x;
+  const y = gravity.y;
 
-  // Use hysteresis to prevent rapid switching.
-  if (x > y * 1.45 && x > 4.5) {
+  const absX = Math.abs(x);
+  const absY = Math.abs(y);
+
+  // Detect landscape orientation
+  if (absX > absY * 1.45 && absX > 4.5) {
+
     physicalLandscape = true;
-  } else if (y > x * 1.45 && y > 4.5) {
+
+    // Detect left or right rotation
+    landscapeDirection = x > 0 ? 1 : -1;
+
+  } else if (
+    absY > absX * 1.45 &&
+    absY > 4.5
+  ) {
+
     physicalLandscape = false;
+    landscapeDirection = 0;
+
   } else {
     return;
   }
 
   updateMemoryOrientation();
 }
+
+
 
 function updateMemoryOrientation() {
   if (
@@ -309,6 +333,25 @@ function updateMemoryOrientation() {
     'memory-landscape',
     physicalLandscape
   );
+
+
+  //1.4.1 version
+  // Remove previous direction classes
+  modal.classList.remove(
+    'landscape-left',
+    'landscape-right'
+  );
+
+  // Apply detected direction
+  if (physicalLandscape) {
+    modal.classList.add(
+      landscapeDirection === 1
+        ? 'landscape-right'
+        : 'landscape-left'
+    );
+  }
+
+
 
   modal.classList.toggle(
     'memory-portrait',
@@ -493,7 +536,16 @@ function cleanupInteraction() {
   stopLandscapeSensor();
   physicalLandscape = false;
   landscapeReady = false;
-  
+
+
+  //1.4.1 version
+  landscapeDirection = 0;
+
+  modal.classList.remove(
+    'landscape-left',
+    'landscape-right'
+  );
+
 
   img.style.visibility = '';
   placeholder.style.visibility = '';

@@ -696,20 +696,41 @@ button {
 }
 
 
+/*1.4.1 version */
 /*1.4 version */
-
 /* Physical landscape orientation while screen stays portrait */
+/* =====================================
+   LEFT / RIGHT LANDSCAPE ORIENTATION
+   ===================================== */
+
+/* Only rotate the image when the browser
+   remains in portrait orientation. */
+
 @media (orientation: portrait) {
-  #modal.memory-landscape #image-area {
-    width: min(86vh, 92vw);
-    max-width: none;
+
+  #modal.memory-landscape.landscape-right #image-area {
     transform: rotate(90deg);
     transform-origin: center center;
-    margin: 0 auto;
+  }
+
+  #modal.memory-landscape.landscape-left #image-area {
+    transform: rotate(-90deg);
+    transform-origin: center center;
   }
 
   #modal.memory-portrait #image-area {
-    transform: none;
+    transform: rotate(0deg);
   }
+
 }
 
+/* If system auto-rotation is enabled,
+   avoid rotating the image twice. */
+
+@media (orientation: landscape) {
+
+  #modal.memory-landscape #image-area {
+    transform: none;
+  }
+
+}
