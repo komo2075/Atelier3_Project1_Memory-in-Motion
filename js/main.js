@@ -1054,7 +1054,7 @@ async function startBlow() {
       last = now;
 
       if (rms > 0.005) {
-        progress += dt * 2;
+        progress += dt * 5;
       } else {
         progress -= dt * 0.05;
       }
