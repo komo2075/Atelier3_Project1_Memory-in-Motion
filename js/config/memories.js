@@ -128,7 +128,7 @@ memory11: {
 
 memory12: {
   title: "Cafeteria",
-  date: "May 22th, 2026",
+  date: "2026",
 
   images: [
     "./assets/memories/012/photo1.jpg"
