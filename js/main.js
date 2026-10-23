@@ -1042,27 +1042,29 @@ async function startBlow() {
         sum += samples[i] * samples[i];
       }
 
-      const rms = Math.sqrt(
-        sum / samples.length
-      );
-
-      const dt = Math.min(
-        (now - last) / 1000,
-        0.06
-      );
-
+      
+      //1.5.3 version
+      const dt = Math.min((now - last) / 1000, 0.06);
       last = now;
 
-      if (rms > 0.005) {
-        progress += dt * 5;
-      } else {
-        progress -= dt * 0.05;
+      // Find the loudest sample in this audio frame
+      let peak = 0;
+
+      for (let i = 0; i < samples.length; i++) {
+        peak = Math.max(peak, Math.abs(samples[i]));
       }
 
-      progress = Math.max(
-        0,
-        Math.min(1, progress)
-      );
+      // Either average sound or a short loud sound can trigger progress
+      const detected = rms > 0.003 || peak > 0.015;
+
+      if (detected) {
+        progress += dt * 6;
+      }
+
+      // No progress loss when user stops blowing
+      progress = Math.max(0, Math.min(1, progress));
+
+
 
       setProgress(progress);
 
