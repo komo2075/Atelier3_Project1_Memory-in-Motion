@@ -1042,8 +1042,11 @@ async function startBlow() {
         sum += samples[i] * samples[i];
       }
 
-      
+
+      //1.6.1 version
+      const rms = Math.sqrt(sum / samples.length);
       //1.5.3 version
+      
       const dt = Math.min((now - last) / 1000, 0.06);
       last = now;
 
