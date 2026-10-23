@@ -1090,12 +1090,23 @@ let base = null;
 
 const rad = Math.PI / 180;
 
+
+
 // Fixed camera distance during motion
+
 let motionDistance = null;
 
-// Current camera angles
 let motionTheta = 0;
 let motionPhi = 0;
+
+// Initial camera angles when motion is enabled
+let initialTheta = 0;
+let initialPhi = 0;
+
+// Target angles from gyroscope
+let targetTheta = 0;
+let targetPhi = 0;
+
 
 function wrapDelta(a, b) {
   return ((a - b + 540) % 360) - 180;
@@ -1155,13 +1166,15 @@ function onOrientation(event) {
 
   // Update angles only.
   // Distance is never calculated from sensor movement.
-  motionTheta = 0.64 + azimuth;
+  
+  targetTheta = initialTheta + azimuth;
 
-  motionPhi = THREE.MathUtils.clamp(
-    0.9 + elevation,
+  targetPhi = THREE.MathUtils.clamp(
+    initialPhi + elevation,
     0.2,
     1.45
   );
+
 }
 
 // =====================================
@@ -1184,6 +1197,10 @@ motionButton.onclick = async () => {
     );
 
     motionButton.textContent = 'Enable motion';
+
+
+    controls.enableDamping = true;
+
 
     controls.enabled = true;
 
@@ -1218,7 +1235,9 @@ motionButton.onclick = async () => {
       }
     }
 
+    
     // Lock current camera distance once.
+    
     motionDistance = camera.position.distanceTo(
       controls.target
     );
@@ -1230,10 +1249,18 @@ motionButton.onclick = async () => {
     motionTheta = spherical.theta;
     motionPhi = spherical.phi;
 
+    initialTheta = spherical.theta;
+    initialPhi = spherical.phi;
+
+    targetTheta = spherical.theta;
+    targetPhi = spherical.phi;
+
     base = null;
     motionEnabled = true;
 
+    controls.enableDamping = false;
     controls.enabled = false;
+
 
     window.addEventListener(
       'deviceorientation',
@@ -1251,11 +1278,12 @@ motionButton.onclick = async () => {
 };
 
 
-
+//1.4 version
 //1.3 version
 // =====================================
 // RESET BUTTON
 // =====================================
+
 document.querySelector('#reset-button').onclick = () => {
   resetView();
   base = null;
@@ -1265,16 +1293,24 @@ document.querySelector('#reset-button').onclick = () => {
       controls.target
     );
 
-    const spherical = new THREE.Spherical().setFromVector3(
-      camera.position.clone().sub(controls.target)
-    );
+    const spherical = new THREE.Spherical()
+      .setFromVector3(
+        camera.position.clone().sub(controls.target)
+      );
 
     motionTheta = spherical.theta;
     motionPhi = spherical.phi;
+
+    initialTheta = spherical.theta;
+    initialPhi = spherical.phi;
+
+    targetTheta = spherical.theta;
+    targetPhi = spherical.phi;
   }
 
   showStatus('View reset');
 };
+
 
 
 
@@ -1341,41 +1377,37 @@ renderer.domElement.addEventListener(
 // 20. RENDER LOOP
 // =====================================
 
-function draw() {
-  requestAnimationFrame(draw);
 
-//1.3 version
-  // Update camera position and rotation based on motion or controls.
 if (motionEnabled) {
 
-  // Build target camera position using locked distance.
-  const targetPosition = new THREE.Vector3()
+  // Smooth angles, not camera distance.
+  motionTheta +=
+    (targetTheta - motionTheta) * 0.13;
+
+  motionPhi +=
+    (targetPhi - motionPhi) * 0.13;
+
+  // Always use the exact locked radius.
+  const direction = new THREE.Vector3()
     .setFromSphericalCoords(
-      motionDistance,
+      1,
       motionPhi,
       motionTheta
-    )
-    .add(controls.target);
+    );
 
-  // Smooth camera rotation.
-  camera.position.lerp(targetPosition, 0.13);
-
-  // Force exact camera distance.
-  const direction = camera.position
-    .clone()
-    .sub(controls.target)
-    .normalize();
-
-  camera.position.copy(controls.target).addScaledVector(
-    direction,
-    motionDistance
-  );
+  camera.position
+    .copy(controls.target)
+    .addScaledVector(
+      direction,
+      motionDistance
+    );
 
   camera.lookAt(controls.target);
 
 } else {
   controls.update();
 }
+
 
 
   camera.updateMatrixWorld();
