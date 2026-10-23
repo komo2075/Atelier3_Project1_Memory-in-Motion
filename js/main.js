@@ -975,13 +975,8 @@ async function startBlow() {
   stopMic();
 
   try {
-    const stream =
-      await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false
-        }
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true
       });
 
     if (
