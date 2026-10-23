@@ -62,6 +62,14 @@
       <h2 id="memory-title"></h2><div class="date" id="memory-date"></div>
       <div id="image-area" class="image-area"><img id="memory-image" alt=""/><div id="image-placeholder" class="image-placeholder">Add your photo in assets/memories</div></div>
       <div id="image-controls" class="image-controls"><button id="prev-image" aria-label="Previous photo">←</button><span id="image-counter"></span><button id="next-image" aria-label="Next photo">→</button></div>
+      <div id="special-interaction" class="special-interaction hidden" aria-live="polite">
+        <div id="interaction-instruction" class="interaction-instruction"></div>
+        <div class="interaction-progress" id="interaction-progress" hidden><div id="interaction-progress-fill"></div></div>
+        <div class="interaction-actions">
+          <button id="start-interaction" class="pill" type="button">Start</button>
+          <button id="fallback-interaction" class="pill secondary" type="button">Reveal manually</button>
+        </div>
+      </div>
       <p id="memory-text"></p>
     </article>
   </div>

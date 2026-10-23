@@ -1,128 +1,1416 @@
+
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 import { points } from './config/points.js';
 import { memories } from './config/memories.js';
 import { settings } from './config/settings.js';
 
-const scene = new THREE.Scene(); scene.background = new THREE.Color('#f4f2ed');
-const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, .1, 250);
-const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
+// =====================================
+// 1. THREE.JS SCENE
+// =====================================
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#f4f2ed');
+
+const camera = new THREE.PerspectiveCamera(
+  42,
+  innerWidth / innerHeight,
+  0.1,
+  250
+);
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: false
+});
+
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
 document.querySelector('#scene').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xffffff,0xc8c1b5,2.3));
-const sun=new THREE.DirectionalLight(0xffffff,3);sun.position.set(-8,17,12);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-22;sun.shadow.camera.right=22;sun.shadow.camera.top=22;sun.shadow.camera.bottom=-22;sun.shadow.bias=-.0005;scene.add(sun);
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(35,35),new THREE.MeshStandardMaterial({color:'#ece9e2',roughness:1}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
-const grid=new THREE.GridHelper(35,35,0xdad6cd,0xe1ddd5);grid.position.y=.007;grid.material.transparent=true;grid.material.opacity=.35;scene.add(grid);
-const campusRoot=new THREE.Group();scene.add(campusRoot);
-function box(x,z,w,d,h,color='#faf9f6'){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.86}));m.position.set(x,h/2,z);m.castShadow=true;m.receiveShadow=true;campusRoot.add(m);return m;
+
+scene.add(
+  new THREE.HemisphereLight(0xffffff, 0xc8c1b5, 2.3)
+);
+
+const sun = new THREE.DirectionalLight(0xffffff, 3);
+sun.position.set(-8, 17, 12);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -22;
+sun.shadow.camera.right = 22;
+sun.shadow.camera.top = 22;
+sun.shadow.camera.bottom = -22;
+sun.shadow.bias = -0.0005;
+scene.add(sun);
+
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(35, 35),
+  new THREE.MeshStandardMaterial({
+    color: '#ece9e2',
+    roughness: 1
+  })
+);
+
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const grid = new THREE.GridHelper(
+  35, 35, 0xdad6cd, 0xe1ddd5
+);
+
+grid.position.y = 0.007;
+grid.material.transparent = true;
+grid.material.opacity = 0.35;
+scene.add(grid);
+
+const campusRoot = new THREE.Group();
+scene.add(campusRoot);
+
+// =====================================
+// 2. CAMPUS MODEL
+// =====================================
+
+function box(x, z, w, d, h, color = '#faf9f6') {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshStandardMaterial({
+      color,
+      roughness: 0.86
+    })
+  );
+
+  mesh.position.set(x, h / 2, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  campusRoot.add(mesh);
+
+  return mesh;
 }
-function buildPlaceholder(){
- box(-3.7,-1.7,3.4,3.1,2.6);box(2.7,-1.4,3.5,2.8,2.1,'#e9e7e2');box(.6,3,4.3,2.2,1.1,'#f8f7f4');box(-4,3.5,2,2.2,1.65,'#e2dfd9');
- const canopy=box(-.4,-1.5,2.5,1.4,.35,'#d9d3ca');canopy.position.y=3.1;
- // Simple ground pathways
- for(const [x,z,w,d] of [[0,0,2,12],[-1,1,12,1.4]]){const path=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({color:'#dedad1'}));path.rotation.x=-Math.PI/2;path.position.set(x,.015,z);path.receiveShadow=true;campusRoot.add(path)}
+
+function buildPlaceholder() {
+  box(-3.7, -1.7, 3.4, 3.1, 2.6);
+  box(2.7, -1.4, 3.5, 2.8, 2.1, '#e9e7e2');
+  box(0.6, 3, 4.3, 2.2, 1.1, '#f8f7f4');
+  box(-4, 3.5, 2, 2.2, 1.65, '#e2dfd9');
+
+  const canopy = box(
+    -0.4, -1.5, 2.5, 1.4, 0.35, '#d9d3ca'
+  );
+
+  canopy.position.y = 3.1;
+
+  for (const [x, z, w, d] of [
+    [0, 0, 2, 12],
+    [-1, 1, 12, 1.4]
+  ]) {
+    const path = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, d),
+      new THREE.MeshStandardMaterial({
+        color: '#dedad1'
+      })
+    );
+
+    path.rotation.x = -Math.PI / 2;
+    path.position.set(x, 0.015, z);
+    path.receiveShadow = true;
+    campusRoot.add(path);
+  }
 }
-async function loadCampus(){
- if(settings.modelMode!=='glb'){buildPlaceholder();return}
- try{const gltf=await new GLTFLoader().loadAsync(settings.modelPath);const model=gltf.scene;model.scale.setScalar(settings.modelScale);model.position.set(settings.modelPosition.x,settings.modelPosition.y,settings.modelPosition.z);model.rotation.y=settings.modelRotationY;model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});campusRoot.add(model);showStatus('GLB campus loaded');}
- catch(e){console.error(e);buildPlaceholder();showStatus('GLB unavailable; showing placeholder campus')}
+
+async function loadCampus() {
+  if (settings.modelMode !== 'glb') {
+    buildPlaceholder();
+    return;
+  }
+
+  try {
+    const gltf = await new GLTFLoader().loadAsync(
+      settings.modelPath
+    );
+
+    const model = gltf.scene;
+
+    model.scale.setScalar(settings.modelScale);
+
+    model.position.set(
+      settings.modelPosition.x,
+      settings.modelPosition.y,
+      settings.modelPosition.z
+    );
+
+    model.rotation.y = settings.modelRotationY;
+
+    model.traverse(object => {
+      if (object.isMesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+
+    campusRoot.add(model);
+    showStatus('GLB campus loaded');
+
+  } catch (error) {
+    console.error('GLB loading failed:', error);
+    buildPlaceholder();
+    showStatus('GLB unavailable; showing placeholder campus');
+  }
 }
+
 loadCampus();
-const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.065;controls.minDistance=6;controls.maxDistance=34;controls.maxPolarAngle=Math.PI/2.1;controls.minPolarAngle=.12;controls.target.set(0,.7,0);
-function resetView(){controls.target.set(0,.7,0);camera.position.set(12,11,settings.cameraDistance);controls.update()}
-resetView();
-const layer=document.querySelector('#point-layer');const modal=document.querySelector('#modal');
-let activeMemory=null,imageIndex=0;
-const pointEls=points.map(p=>{const b=document.createElement('button');b.type='button';b.className='memory-point';b.setAttribute('aria-label',`Open ${memories[p.memoryId]?.title||p.memoryId}`);b.title=memories[p.memoryId]?.title||p.memoryId;b.addEventListener('click',()=>openMemory(p.memoryId));layer.appendChild(b);return {config:p,button:b,world:new THREE.Vector3(p.position.x,p.position.y,p.position.z)};});
-function openMemory(id){const data=memories[id];if(!data){showStatus(`Missing memory: ${id}`);return}activeMemory=data;imageIndex=0;document.querySelector('#memory-label').textContent=id.toUpperCase();document.querySelector('#memory-title').textContent=data.title||'';document.querySelector('#memory-date').textContent=data.date||'';document.querySelector('#memory-text').textContent=data.text||'';updateImage();modal.classList.remove('hidden');}
-function updateImage(){const img=document.querySelector('#memory-image');const placeholder=document.querySelector('#image-placeholder');const list=activeMemory?.images||[];const area=document.querySelector('#image-controls');area.style.display=list.length>1?'flex':'none';document.querySelector('#image-counter').textContent=list.length?`${imageIndex+1} / ${list.length}`:'';img.onload=()=>{img.style.display='block';placeholder.style.display='none'};img.onerror=()=>{img.style.display='none';placeholder.style.display='block';placeholder.textContent='Photo not found. Check the image path in memories.js.'};if(list.length){img.style.display='none';placeholder.style.display='block';placeholder.textContent='Loading photo…';img.src=new URL('../'+list[imageIndex],import.meta.url).href}else{img.removeAttribute('src');img.style.display='none';placeholder.style.display='block';placeholder.textContent='Add your photos in assets/memories, then update memories.js.'}}
-document.querySelector('#prev-image').onclick=()=>{imageIndex=(imageIndex-1+(activeMemory.images.length))%activeMemory.images.length;updateImage()};document.querySelector('#next-image').onclick=()=>{imageIndex=(imageIndex+1)%activeMemory.images.length;updateImage()};
-function closeModal(){modal.classList.add('hidden')};document.querySelector('#close-modal').onclick=closeModal;document.querySelector('[data-close]').onclick=closeModal;
-document.querySelector('#help-button').onclick=()=>document.querySelector('#help-modal').classList.remove('hidden');function closeHelp(){document.querySelector('#help-modal').classList.add('hidden')}document.querySelector('#close-help').onclick=closeHelp;document.querySelector('[data-close-help]').onclick=closeHelp;document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeHelp()}});
-let statusTimeout;function showStatus(s){const el=document.querySelector('#status');el.textContent=s;el.classList.add('show');clearTimeout(statusTimeout);statusTimeout=setTimeout(()=>el.classList.remove('show'),3500)}
-// Motion is relative to the orientation at activation. DeviceOrientationEvent is available
-// only on secure contexts and supported devices. Desktop/touch OrbitControls remains fallback.
-let motionEnabled=false,base=null,lastAngles=null;const rad=Math.PI/180;
-function wrapDelta(a,b){return ((a-b+540)%360)-180}
-function onOrientation(e){if(!motionEnabled||e.alpha==null||e.beta==null||e.gamma==null)return;
- const current={alpha:e.alpha,beta:e.beta,gamma:e.gamma};if(!base){base=current;lastAngles=current;showStatus('Motion calibrated. Rotate your phone.');return}
- // Landscape and portrait axes vary across browsers; screen orientation is used to
- // map the two directional gestures to azimuth and elevation.
- const screenAngle=screen.orientation?.angle??window.orientation??0;
- const landscape=Math.abs(screenAngle)%180===90;
- const horizontal=landscape?wrapDelta(current.beta,base.beta):wrapDelta(current.gamma,base.gamma);
- const vertical=landscape?wrapDelta(current.gamma,base.gamma):wrapDelta(current.beta,base.beta);
- const azimuth=THREE.MathUtils.clamp(horizontal*rad*settings.gyroSensitivity,-1.35,1.35);
- const elevation=THREE.MathUtils.clamp(vertical*rad*settings.gyroSensitivity,-.75,.75);
- const distance=camera.position.distanceTo(controls.target);
- const theta=.64+azimuth;const phi=THREE.MathUtils.clamp(.9+elevation,.2,1.45);
- const target=new THREE.Vector3().setFromSphericalCoords(distance,phi,theta).add(controls.target);
- camera.position.lerp(target,.13);camera.lookAt(controls.target);lastAngles=current;
+
+// =====================================
+// 3. CAMERA CONTROLS
+// =====================================
+
+const controls = new OrbitControls(
+  camera,
+  renderer.domElement
+);
+
+controls.enableDamping = true;
+controls.dampingFactor = 0.065;
+controls.minDistance = 6;
+controls.maxDistance = 34;
+controls.maxPolarAngle = Math.PI / 2.1;
+controls.minPolarAngle = 0.12;
+controls.target.set(0, 0.7, 0);
+
+function resetView() {
+  controls.target.set(0, 0.7, 0);
+
+  camera.position.set(
+    12,
+    11,
+    settings.cameraDistance
+  );
+
+  controls.update();
 }
-const motionButton=document.querySelector('#motion-button');motionButton.onclick=async()=>{
- if(motionEnabled){motionEnabled=false;window.removeEventListener('deviceorientation',onOrientation);motionButton.textContent='Enable motion';controls.enabled=true;showStatus('Motion disabled');return}
- if(!window.isSecureContext){showStatus('Motion requires HTTPS or localhost');return}
- if(!('DeviceOrientationEvent' in window)){showStatus('Device motion not supported by this browser');return}
- try{if(typeof DeviceOrientationEvent.requestPermission==='function'){const result=await DeviceOrientationEvent.requestPermission();if(result!=='granted'){showStatus('Motion permission denied');return}}
- base=null;motionEnabled=true;controls.enabled=false;window.addEventListener('deviceorientation',onOrientation);motionButton.textContent='Disable motion';showStatus('Move your phone to calibrate');}
- catch(err){console.error(err);showStatus('Could not enable device motion')}
-};
-document.querySelector('#reset-button').onclick=()=>{resetView();base=null;showStatus(motionEnabled?'View reset; hold phone at starting angle':'View reset')};
-// Developer-only position picker. Ground/building mesh click gives world coordinate.
-const debug=new URLSearchParams(location.search).get('debug')==='true';if(debug)document.querySelector('#debug-panel').classList.remove('hidden');
-const raycaster=new THREE.Raycaster();const pointer=new THREE.Vector2();
-renderer.domElement.addEventListener('click',async e=>{if(!debug)return;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects([floor,...campusRoot.children],true);if(!hits.length)return;const p=hits[0].point;const str=`{ x: ${p.x.toFixed(2)}, y: ${(p.y+.3).toFixed(2)}, z: ${p.z.toFixed(2)} }`;document.querySelector('#debug-coords').textContent=str;try{await navigator.clipboard.writeText(str);showStatus('Coordinates copied')}catch{showStatus('Coordinates shown in debug panel')}});
-function draw(){requestAnimationFrame(draw);if(!motionEnabled)controls.update();camera.updateMatrixWorld();const w=innerWidth,h=innerHeight;
- for(const {button,world} of pointEls){const v=world.clone().project(camera);const front=world.clone().sub(camera.position).dot(camera.getWorldDirection(new THREE.Vector3()))>0;const visible=front&&v.z>-1&&v.z<1&&Math.abs(v.x)<1.08&&Math.abs(v.y)<1.08;button.style.display=visible?'grid':'none';if(visible){button.style.left=`${(v.x*.5+.5)*w}px`;button.style.top=`${(-v.y*.5+.5)*h}px`}}
- renderer.render(scene,camera)}draw();
-window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+resetView();
+
+// =====================================
+// 4. MEMORY ELEMENTS
+// =====================================
+
+const layer = document.querySelector('#point-layer');
+const modal = document.querySelector('#modal');
+
+const img = document.querySelector('#memory-image');
+const placeholder = document.querySelector('#image-placeholder');
+const imageArea = document.querySelector('#image-area');
+
+const specialPanel = document.querySelector(
+  '#special-interaction'
+);
+
+const specialInstruction = document.querySelector(
+  '#interaction-instruction'
+);
+
+const startInteractionButton = document.querySelector(
+  '#start-interaction'
+);
+
+const fallbackInteractionButton = document.querySelector(
+  '#fallback-interaction'
+);
+
+const progressContainer = document.querySelector(
+  '#interaction-progress'
+);
+
+const progressFill = document.querySelector(
+  '#interaction-progress-fill'
+);
+
+const memoryText = document.querySelector('#memory-text');
+
+let activeMemory = null;
+let imageIndex = 0;
+let activeInteraction = 'normal';
+let revealed = false;
+
+let microphoneStream = null;
+let audioContext = null;
+let analyser = null;
+let micFrame = 0;
+
+let shakeListenerActive = false;
+let lastShakeTime = 0;
+let lastShakeSample = null;
+let shakeHits = 0;
+
+let modalSensorPaused = false;
+
+
+ // =====================================
+ // 5. LANDSCAPE UNLOCK + RESPONSIVE PHOTO
+ // =====================================
+
+let landscapeReady = false;
+
+function isLandscape() {
+  const angle = screen.orientation?.angle;
+
+  if (typeof angle === 'number') {
+    return Math.abs(angle) % 180 === 90;
+  }
+
+  return window.matchMedia(
+    '(orientation: landscape)'
+  ).matches;
+}
+
+// Update the photo layout according to screen orientation.
+function updateMemoryOrientation() {
+  if (
+    activeInteraction !== 'landscape' ||
+    modal.classList.contains('hidden')
+  ) {
+    return;
+  }
+
+  const landscape = isLandscape();
+
+  modal.classList.toggle(
+    'memory-landscape',
+    landscape
+  );
+
+  modal.classList.toggle(
+    'memory-portrait',
+    !landscape
+  );
+
+  // Already unlocked: keep the photo visible.
+  if (revealed) {
+    img.style.visibility = '';
+    placeholder.style.visibility = '';
+    return;
+  }
+
+  // Not unlocked: require portrait -> landscape.
+  if (!landscape) {
+    landscapeReady = true;
+
+    specialInstruction.textContent =
+      'Rotate your phone sideways to reveal the memory.';
+
+    return;
+  }
+
+  if (landscapeReady) {
+    unlockMemory();
+  } else {
+    specialInstruction.textContent =
+      'Hold your phone upright first, then rotate sideways.';
+  }
+}
+
+function checkLandscapeUnlock() {
+  updateMemoryOrientation();
+}
+
+window.addEventListener(
+  'orientationchange',
+  updateMemoryOrientation
+);
+
+window.addEventListener(
+  'resize',
+  updateMemoryOrientation
+);
+
+if (screen.orientation?.addEventListener) {
+  screen.orientation.addEventListener(
+    'change',
+    updateMemoryOrientation
+  );
+}
 
 
 // =====================================
-// Memory Points Visibility Toggle
+// 6. MEMORY POINTS
+// =====================================
+
+const pointEls = points.map(point => {
+  const button = document.createElement('button');
+
+  button.type = 'button';
+  button.className = 'memory-point';
+
+  const interaction = point.interaction || 'normal';
+
+  if (interaction !== 'normal') {
+    button.classList.add('special');
+    button.dataset.interaction = interaction;
+  }
+
+  const title =
+    memories[point.memoryId]?.title || point.memoryId;
+
+  button.setAttribute(
+    'aria-label',
+    `Open ${title}`
+  );
+
+  button.title = title;
+
+  button.addEventListener('click', () => {
+    openMemory(point.memoryId, interaction);
+  });
+
+  layer.appendChild(button);
+
+  return {
+    config: point,
+    button,
+    world: new THREE.Vector3(
+      point.position.x,
+      point.position.y,
+      point.position.z
+    )
+  };
+});
+
+// =====================================
+// 7. CLEANUP
+// =====================================
+
+function stopMic() {
+  cancelAnimationFrame(micFrame);
+  micFrame = 0;
+
+  if (microphoneStream) {
+    microphoneStream.getTracks().forEach(
+      track => track.stop()
+    );
+
+    microphoneStream = null;
+  }
+
+  if (audioContext) {
+    audioContext.close().catch(() => {});
+    audioContext = null;
+  }
+
+  analyser = null;
+}
+
+function stopShake() {
+  if (shakeListenerActive) {
+    window.removeEventListener(
+      'devicemotion',
+      onShake
+    );
+  }
+
+  shakeListenerActive = false;
+  lastShakeSample = null;
+  shakeHits = 0;
+}
+
+function cleanupInteraction() {
+  stopMic();
+  stopShake();
+
+  landscapeReady = false;
+
+  img.style.visibility = '';
+  placeholder.style.visibility = '';
+
+  imageArea.classList.remove('fogged');
+  imageArea.style.removeProperty('--fog-opacity');
+
+  img.classList.remove('image-switching');
+}
+
+function setProgress(value) {
+  const progress = Math.min(
+    1,
+    Math.max(0, value)
+  );
+
+  progressFill.style.width =
+    `${Math.round(progress * 100)}%`;
+}
+
+// =====================================
+// 8. UNLOCK MEMORY
+// =====================================
+
+function unlockMemory() {
+  if (revealed) return;
+
+  revealed = true;
+
+  stopMic();
+  stopShake();
+
+  img.style.visibility = '';
+  placeholder.style.visibility = '';
+
+  imageArea.classList.remove('fogged');
+  imageArea.style.setProperty('--fog-opacity', '0');
+
+  memoryText.hidden = false;
+
+  specialInstruction.textContent =
+    activeInteraction === 'shake'
+      ? 'Memory changed.'
+      : 'Memory revealed.';
+
+  startInteractionButton.hidden = true;
+  fallbackInteractionButton.hidden = true;
+  progressContainer.hidden = true;
+}
+
+// =====================================
+// 9. OPEN MEMORY
+// =====================================
+
+function openMemory(id, interaction = 'normal') {
+  const data = memories[id];
+
+  if (!data) {
+    showStatus(`Missing memory: ${id}`);
+    return;
+  }
+
+  cleanupInteraction();
+
+  activeMemory = data;
+  activeInteraction = interaction;
+  revealed = interaction === 'normal';
+  imageIndex = 0;
+
+  modalSensorPaused = true;
+
+  document.querySelector('#memory-label').textContent =
+    interaction === 'normal'
+      ? id.toUpperCase()
+      : 'INTERACTIVE MEMORY · ' + interaction.toUpperCase();
+
+  document.querySelector('#memory-title').textContent =
+    data.title || '';
+
+  document.querySelector('#memory-date').textContent =
+    data.date || '';
+
+  memoryText.textContent = data.text || '';
+  memoryText.hidden = !revealed;
+
+  specialPanel.classList.toggle(
+    'hidden',
+    interaction === 'normal'
+  );
+
+  startInteractionButton.hidden = false;
+  startInteractionButton.disabled = false;
+
+  fallbackInteractionButton.hidden = false;
+
+  progressContainer.hidden = interaction !== 'blow';
+  setProgress(0);
+
+  if (interaction === 'blow') {
+    imageArea.classList.add('fogged');
+
+    imageArea.style.setProperty(
+      '--fog-opacity',
+      '0.96'
+    );
+
+    specialInstruction.textContent =
+      'Blow gently toward your phone microphone to clear the mist.';
+
+    startInteractionButton.textContent =
+      'Enable microphone';
+
+    fallbackInteractionButton.textContent =
+      'Reveal without microphone';
+  }
+
+  else if (interaction === 'shake') {
+    specialInstruction.textContent =
+      'Shake your phone to change the photograph.';
+
+    startInteractionButton.textContent =
+      'Enable shake';
+
+    fallbackInteractionButton.textContent =
+      'Change photo manually';
+  }
+
+  else if (interaction === 'landscape') {
+    landscapeReady = !isLandscape();
+
+    specialInstruction.textContent =
+      'Rotate your phone sideways to reveal this memory.';
+
+    startInteractionButton.textContent =
+      'Check orientation';
+
+    fallbackInteractionButton.textContent =
+      'Reveal manually';
+
+    // Keep image hidden until orientation unlock.
+    img.style.visibility = 'hidden';
+    placeholder.style.visibility = 'hidden';
+  }
+
+  updateImage();
+
+  modal.classList.remove('hidden');
+
+  if (interaction === 'landscape') {
+    requestAnimationFrame(checkLandscapeUnlock);
+  }
+}
+
+// =====================================
+// 10. MEMORY IMAGES
+// =====================================
+
+function updateImage() {
+  const list = activeMemory?.images || [];
+
+  const controlsArea = document.querySelector(
+    '#image-controls'
+  );
+
+  controlsArea.style.display =
+    activeInteraction === 'normal' && list.length > 1
+      ? 'flex'
+      : 'none';
+
+  document.querySelector('#image-counter').textContent =
+    list.length
+      ? `${imageIndex + 1} / ${list.length}`
+      : '';
+
+  img.onload = () => {
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    img.classList.remove('image-switching');
+  };
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    placeholder.style.display = 'block';
+
+    placeholder.textContent =
+      'Photo not found. Check the image path in memories.js.';
+
+    img.classList.remove('image-switching');
+  };
+
+  if (list.length) {
+    img.style.display = 'none';
+    placeholder.style.display = 'block';
+    placeholder.textContent = 'Loading photo…';
+
+    img.src = new URL(
+      '../' + list[imageIndex],
+      import.meta.url
+    ).href;
+  } else {
+    img.removeAttribute('src');
+
+    img.style.display = 'none';
+    placeholder.style.display = 'block';
+
+    placeholder.textContent =
+      'Add your photos in assets/memories, then update memories.js.';
+  }
+}
+
+// =====================================
+// 11. SHAKE PHOTO
+// =====================================
+
+function switchShakePhoto() {
+  if (
+    activeInteraction !== 'shake' ||
+    revealed
+  ) {
+    return;
+  }
+
+  if ((activeMemory.images || []).length < 2) {
+    showStatus(
+      'Add before.jpg and after.jpg in memories.js'
+    );
+    return;
+  }
+
+  img.classList.add('image-switching');
+
+  setTimeout(() => {
+    if (
+      activeInteraction !== 'shake' ||
+      revealed ||
+      modal.classList.contains('hidden')
+    ) {
+      return;
+    }
+
+    imageIndex = 1;
+    updateImage();
+    unlockMemory();
+  }, 190);
+}
+
+function onShake(event) {
+  if (
+    activeInteraction !== 'shake' ||
+    revealed ||
+    modal.classList.contains('hidden')
+  ) {
+    return;
+  }
+
+  const acceleration =
+    event.accelerationIncludingGravity ||
+    event.acceleration;
+
+  if (
+    !acceleration ||
+    acceleration.x == null ||
+    acceleration.y == null ||
+    acceleration.z == null
+  ) {
+    return;
+  }
+
+  const now = performance.now();
+
+  const current = {
+    x: acceleration.x,
+    y: acceleration.y,
+    z: acceleration.z,
+    time: now
+  };
+
+  if (lastShakeSample) {
+    const dt = now - lastShakeSample.time;
+
+    if (dt > 15 && dt < 350) {
+      const diff = Math.hypot(
+        acceleration.x - lastShakeSample.x,
+        acceleration.y - lastShakeSample.y,
+        acceleration.z - lastShakeSample.z
+      );
+
+      if (
+        diff > 14 &&
+        now - lastShakeTime > 170
+      ) {
+        shakeHits++;
+        lastShakeTime = now;
+      }
+
+      if (shakeHits >= 2) {
+        switchShakePhoto();
+        return;
+      }
+    }
+
+    if (now - lastShakeTime > 1300) {
+      shakeHits = 0;
+    }
+  }
+
+  lastShakeSample = current;
+}
+
+async function startShake() {
+  if (!window.isSecureContext) {
+    showStatus('Shake requires HTTPS or localhost');
+    return;
+  }
+
+  if (!('DeviceMotionEvent' in window)) {
+    showStatus(
+      'Motion sensors unavailable. Use manual button.'
+    );
+    return;
+  }
+
+  try {
+    if (
+      typeof DeviceMotionEvent.requestPermission ===
+      'function'
+    ) {
+      const permission =
+        await DeviceMotionEvent.requestPermission();
+
+      if (permission !== 'granted') {
+        showStatus('Motion permission denied');
+        return;
+      }
+    }
+
+    if (
+      activeInteraction !== 'shake' ||
+      modal.classList.contains('hidden')
+    ) {
+      return;
+    }
+
+    stopShake();
+
+    shakeListenerActive = true;
+
+    window.addEventListener(
+      'devicemotion',
+      onShake
+    );
+
+    specialInstruction.textContent =
+      'Shake your phone twice to change the photo.';
+
+    startInteractionButton.textContent =
+      'Shake enabled';
+
+    startInteractionButton.disabled = true;
+
+  } catch (error) {
+    console.error(error);
+
+    showStatus(
+      'Unable to access motion sensor. Use manual button.'
+    );
+  }
+}
+
+// =====================================
+// 12. BLOW INTERACTION
+// =====================================
+
+async function startBlow() {
+  if (
+    !window.isSecureContext ||
+    !navigator.mediaDevices?.getUserMedia
+  ) {
+    showStatus(
+      'Microphone requires HTTPS or localhost'
+    );
+    return;
+  }
+
+  stopMic();
+
+  try {
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      });
+
+    if (
+      activeInteraction !== 'blow' ||
+      modal.classList.contains('hidden')
+    ) {
+      stream.getTracks().forEach(
+        track => track.stop()
+      );
+      return;
+    }
+
+    microphoneStream = stream;
+
+    audioContext = new (
+      window.AudioContext ||
+      window.webkitAudioContext
+    )();
+
+    const source =
+      audioContext.createMediaStreamSource(stream);
+
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 1024;
+
+    source.connect(analyser);
+
+    await audioContext.resume();
+
+    const samples =
+      new Float32Array(analyser.fftSize);
+
+    let progress = 0;
+    let last = performance.now();
+
+    startInteractionButton.textContent =
+      'Listening…';
+
+    startInteractionButton.disabled = true;
+
+    specialInstruction.textContent =
+      'Blow gently and steadily into the microphone.';
+
+    function tick(now) {
+      if (
+        !analyser ||
+        activeInteraction !== 'blow' ||
+        modal.classList.contains('hidden')
+      ) {
+        return;
+      }
+
+      analyser.getFloatTimeDomainData(samples);
+
+      let sum = 0;
+
+      for (let i = 0; i < samples.length; i++) {
+        sum += samples[i] * samples[i];
+      }
+
+      const rms = Math.sqrt(
+        sum / samples.length
+      );
+
+      const dt = Math.min(
+        (now - last) / 1000,
+        0.06
+      );
+
+      last = now;
+
+      if (rms > 0.075) {
+        progress += dt * 0.48;
+      } else {
+        progress -= dt * 0.10;
+      }
+
+      progress = Math.max(
+        0,
+        Math.min(1, progress)
+      );
+
+      setProgress(progress);
+
+      imageArea.style.setProperty(
+        '--fog-opacity',
+        String(0.96 * (1 - progress))
+      );
+
+      if (progress >= 1) {
+        unlockMemory();
+        return;
+      }
+
+      micFrame = requestAnimationFrame(tick);
+    }
+
+    micFrame = requestAnimationFrame(tick);
+
+  } catch (error) {
+    console.error(error);
+
+    showStatus(
+      'Microphone unavailable or denied. Use manual reveal.'
+    );
+  }
+}
+
+// =====================================
+// 13. INTERACTION BUTTONS
+// =====================================
+
+startInteractionButton.onclick = () => {
+  if (activeInteraction === 'blow') {
+    startBlow();
+  }
+
+  if (activeInteraction === 'shake') {
+    startShake();
+  }
+
+  if (activeInteraction === 'landscape') {
+    checkLandscapeUnlock();
+
+    if (!revealed) {
+      showStatus(
+        'Rotate your phone from portrait to landscape'
+      );
+    }
+  }
+};
+
+fallbackInteractionButton.onclick = () => {
+  if (activeInteraction === 'shake') {
+    switchShakePhoto();
+  }
+
+  if (
+    activeInteraction === 'blow' ||
+    activeInteraction === 'landscape'
+  ) {
+    unlockMemory();
+  }
+};
+
+// =====================================
+// 14. IMAGE NAVIGATION
+// =====================================
+
+document.querySelector('#prev-image').onclick = () => {
+  if (
+    !activeMemory?.images?.length ||
+    activeInteraction !== 'normal'
+  ) {
+    return;
+  }
+
+  imageIndex = (
+    imageIndex - 1 + activeMemory.images.length
+  ) % activeMemory.images.length;
+
+  updateImage();
+};
+
+document.querySelector('#next-image').onclick = () => {
+  if (
+    !activeMemory?.images?.length ||
+    activeInteraction !== 'normal'
+  ) {
+    return;
+  }
+
+  imageIndex = (
+    imageIndex + 1
+  ) % activeMemory.images.length;
+
+  updateImage();
+};
+
+// =====================================
+// 15. CLOSE MEMORY
+// =====================================
+
+
+function closeModal() {
+  cleanupInteraction();
+
+  modalSensorPaused = false;
+
+  activeInteraction = 'normal';
+  activeMemory = null;
+  revealed = false;
+  landscapeReady = false;
+
+  modal.classList.remove(
+    'memory-landscape',
+    'memory-portrait'
+  );
+
+  startInteractionButton.disabled = false;
+
+  modal.classList.add('hidden');
+}
+
+
+document.querySelector('#close-modal').onclick =
+  closeModal;
+
+document.querySelector('[data-close]').onclick =
+  closeModal;
+
+// =====================================
+// 16. HELP MODAL
+// =====================================
+
+document.querySelector('#help-button').onclick = () => {
+  document.querySelector('#help-modal')
+    .classList.remove('hidden');
+};
+
+function closeHelp() {
+  document.querySelector('#help-modal')
+    .classList.add('hidden');
+}
+
+document.querySelector('#close-help').onclick =
+  closeHelp;
+
+document.querySelector('[data-close-help]').onclick =
+  closeHelp;
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    closeModal();
+    closeHelp();
+  }
+});
+
+// =====================================
+// 17. STATUS MESSAGE
+// =====================================
+
+let statusTimeout;
+
+function showStatus(message) {
+  const element = document.querySelector('#status');
+
+  element.textContent = message;
+  element.classList.add('show');
+
+  clearTimeout(statusTimeout);
+
+  statusTimeout = setTimeout(() => {
+    element.classList.remove('show');
+  }, 3500);
+}
+
+// =====================================
+// 18. GYROSCOPE CAMERA CONTROL
+// =====================================
+
+let motionEnabled = false;
+let base = null;
+let lastAngles = null;
+
+const rad = Math.PI / 180;
+
+function wrapDelta(a, b) {
+  return ((a - b + 540) % 360) - 180;
+}
+
+function onOrientation(event) {
+  if (
+    modalSensorPaused ||
+    !motionEnabled ||
+    event.alpha == null ||
+    event.beta == null ||
+    event.gamma == null
+  ) {
+    return;
+  }
+
+  const current = {
+    alpha: event.alpha,
+    beta: event.beta,
+    gamma: event.gamma
+  };
+
+  if (!base) {
+    base = current;
+    lastAngles = current;
+
+    showStatus(
+      'Motion calibrated. Rotate your phone.'
+    );
+
+    return;
+  }
+
+  const screenAngle =
+    screen.orientation?.angle ??
+    window.orientation ??
+    0;
+
+  const landscape =
+    Math.abs(screenAngle) % 180 === 90;
+
+  const horizontal = landscape
+    ? wrapDelta(current.beta, base.beta)
+    : wrapDelta(current.gamma, base.gamma);
+
+  const vertical = landscape
+    ? wrapDelta(current.gamma, base.gamma)
+    : wrapDelta(current.beta, base.beta);
+
+  const azimuth = THREE.MathUtils.clamp(
+    horizontal * rad * settings.gyroSensitivity,
+    -1.35,
+    1.35
+  );
+
+  const elevation = THREE.MathUtils.clamp(
+    vertical * rad * settings.gyroSensitivity,
+    -0.75,
+    0.75
+  );
+
+  const distance = camera.position.distanceTo(
+    controls.target
+  );
+
+  const theta = 0.64 + azimuth;
+
+  const phi = THREE.MathUtils.clamp(
+    0.9 + elevation,
+    0.2,
+    1.45
+  );
+
+  const target = new THREE.Vector3()
+    .setFromSphericalCoords(
+      distance,
+      phi,
+      theta
+    )
+    .add(controls.target);
+
+  camera.position.lerp(target, 0.13);
+  camera.lookAt(controls.target);
+
+  lastAngles = current;
+}
+
+const motionButton = document.querySelector(
+  '#motion-button'
+);
+
+motionButton.onclick = async () => {
+  if (motionEnabled) {
+    motionEnabled = false;
+
+    window.removeEventListener(
+      'deviceorientation',
+      onOrientation
+    );
+
+    motionButton.textContent = 'Enable motion';
+    controls.enabled = true;
+
+    showStatus('Motion disabled');
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    showStatus('Motion requires HTTPS or localhost');
+    return;
+  }
+
+  if (!('DeviceOrientationEvent' in window)) {
+    showStatus(
+      'Device motion not supported by this browser'
+    );
+    return;
+  }
+
+  try {
+    if (
+      typeof DeviceOrientationEvent.requestPermission ===
+      'function'
+    ) {
+      const result =
+        await DeviceOrientationEvent.requestPermission();
+
+      if (result !== 'granted') {
+        showStatus('Motion permission denied');
+        return;
+      }
+    }
+
+    base = null;
+    motionEnabled = true;
+    controls.enabled = false;
+
+    window.addEventListener(
+      'deviceorientation',
+      onOrientation
+    );
+
+    motionButton.textContent = 'Disable motion';
+
+    showStatus('Move your phone to calibrate');
+
+  } catch (error) {
+    console.error(error);
+
+    showStatus('Could not enable device motion');
+  }
+};
+
+document.querySelector('#reset-button').onclick = () => {
+  resetView();
+  base = null;
+
+  showStatus(
+    motionEnabled
+      ? 'View reset; hold phone at starting angle'
+      : 'View reset'
+  );
+};
+
+// =====================================
+// 19. DEBUG POSITION PICKER
+// =====================================
+
+const debug = new URLSearchParams(
+  location.search
+).get('debug') === 'true';
+
+if (debug) {
+  document.querySelector('#debug-panel')
+    .classList.remove('hidden');
+}
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+renderer.domElement.addEventListener(
+  'click',
+  async event => {
+    if (!debug) return;
+
+    const rect =
+      renderer.domElement.getBoundingClientRect();
+
+    pointer.set(
+      (event.clientX - rect.left) / rect.width * 2 - 1,
+      -(event.clientY - rect.top) / rect.height * 2 + 1
+    );
+
+    raycaster.setFromCamera(pointer, camera);
+
+    const hits = raycaster.intersectObjects(
+      [floor, ...campusRoot.children],
+      true
+    );
+
+    if (!hits.length) return;
+
+    const point = hits[0].point;
+
+    const result =
+      `{ x: ${point.x.toFixed(2)}, ` +
+      `y: ${(point.y + 0.3).toFixed(2)}, ` +
+      `z: ${point.z.toFixed(2)} }`;
+
+    document.querySelector('#debug-coords')
+      .textContent = result;
+
+    try {
+      await navigator.clipboard.writeText(result);
+      showStatus('Coordinates copied');
+    } catch {
+      showStatus(
+        'Coordinates shown in debug panel'
+      );
+    }
+  }
+);
+
+// =====================================
+// 20. RENDER LOOP
+// =====================================
+
+function draw() {
+  requestAnimationFrame(draw);
+
+  if (!motionEnabled) {
+    controls.update();
+  }
+
+  camera.updateMatrixWorld();
+
+  const width = innerWidth;
+  const height = innerHeight;
+
+  for (const { button, world } of pointEls) {
+    const projected = world.clone().project(camera);
+
+    const front =
+      world.clone()
+        .sub(camera.position)
+        .dot(
+          camera.getWorldDirection(
+            new THREE.Vector3()
+          )
+        ) > 0;
+
+    const visible =
+      front &&
+      projected.z > -1 &&
+      projected.z < 1 &&
+      Math.abs(projected.x) < 1.08 &&
+      Math.abs(projected.y) < 1.08;
+
+    button.style.display =
+      visible ? 'grid' : 'none';
+
+    if (visible) {
+      button.style.left =
+        `${(projected.x * 0.5 + 0.5) * width}px`;
+
+      button.style.top =
+        `${(-projected.y * 0.5 + 0.5) * height}px`;
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+draw();
+
+// =====================================
+// 21. RESIZE
+// =====================================
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(
+    innerWidth,
+    innerHeight
+  );
+});
+
+// =====================================
+// 22. MEMORY POINT VISIBILITY TOGGLE
 // =====================================
 
 const togglePointsButton =
-  document.getElementById("toggle-points");
+  document.getElementById('toggle-points');
 
 const pointLayer =
-  document.getElementById("point-layer");
+  document.getElementById('point-layer');
 
 const eyeIcon =
-  document.getElementById("eye-icon");
+  document.getElementById('eye-icon');
 
 let pointsVisible = true;
 
-togglePointsButton.addEventListener("click", () => {
-
+togglePointsButton.addEventListener('click', () => {
   pointsVisible = !pointsVisible;
 
   pointLayer.classList.toggle(
-    "points-hidden",
+    'points-hidden',
     !pointsVisible
   );
 
   if (pointsVisible) {
-
-    // Eye open
     eyeIcon.innerHTML = `
       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
       <circle cx="12" cy="12" r="3"/>
     `;
 
-    togglePointsButton.title = "Hide memory points";
+    togglePointsButton.title =
+      'Hide memory points';
+
     togglePointsButton.setAttribute(
-      "aria-label",
-      "Hide memory points"
+      'aria-label',
+      'Hide memory points'
     );
 
   } else {
-
-    // Eye closed
     eyeIcon.innerHTML = `
       <path d="M3 3l18 18"/>
       <path d="M10.6 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a15 15 0 0 1-4 4.7"/>
@@ -130,15 +1418,17 @@ togglePointsButton.addEventListener("click", () => {
       <path d="M10 10a3 3 0 0 0 4 4"/>
     `;
 
-    togglePointsButton.title = "Show memory points";
+    togglePointsButton.title =
+      'Show memory points';
+
     togglePointsButton.setAttribute(
-      "aria-label",
-      "Show memory points"
+      'aria-label',
+      'Show memory points'
     );
   }
 
   togglePointsButton.setAttribute(
-    "aria-pressed",
+    'aria-pressed',
     String(!pointsVisible)
   );
 });
