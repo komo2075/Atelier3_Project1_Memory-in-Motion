@@ -252,25 +252,51 @@ let shakeHits = 0;
 let modalSensorPaused = false;
 
 
+ 
+//1.4 version
  // =====================================
- // 5. LANDSCAPE UNLOCK + RESPONSIVE PHOTO
+ // 5. LANDSCAPE MEMORY - SENSOR CONTROL
  // =====================================
 
 let landscapeReady = false;
+let physicalLandscape = false;
+let landscapeSensorActive = false;
 
-function isLandscape() {
-  const angle = screen.orientation?.angle;
-
-  if (typeof angle === 'number') {
-    return Math.abs(angle) % 180 === 90;
+// Detect physical orientation using gravity.
+// Works even when screen rotation is locked.
+function onLandscapeMotion(event) {
+  if (
+    activeInteraction !== 'landscape' ||
+    modal.classList.contains('hidden')
+  ) {
+    return;
   }
 
-  return window.matchMedia(
-    '(orientation: landscape)'
-  ).matches;
+  const gravity = event.accelerationIncludingGravity;
+
+  if (
+    !gravity ||
+    gravity.x == null ||
+    gravity.y == null
+  ) {
+    return;
+  }
+
+  const x = Math.abs(gravity.x);
+  const y = Math.abs(gravity.y);
+
+  // Use hysteresis to prevent rapid switching.
+  if (x > y * 1.45 && x > 4.5) {
+    physicalLandscape = true;
+  } else if (y > x * 1.45 && y > 4.5) {
+    physicalLandscape = false;
+  } else {
+    return;
+  }
+
+  updateMemoryOrientation();
 }
 
-// Update the photo layout according to screen orientation.
 function updateMemoryOrientation() {
   if (
     activeInteraction !== 'landscape' ||
@@ -279,27 +305,24 @@ function updateMemoryOrientation() {
     return;
   }
 
-  const landscape = isLandscape();
-
   modal.classList.toggle(
     'memory-landscape',
-    landscape
+    physicalLandscape
   );
 
   modal.classList.toggle(
     'memory-portrait',
-    !landscape
+    !physicalLandscape
   );
 
-  // Already unlocked: keep the photo visible.
+  // Once unlocked, remain visible until modal closes.
   if (revealed) {
     img.style.visibility = '';
     placeholder.style.visibility = '';
     return;
   }
 
-  // Not unlocked: require portrait -> landscape.
-  if (!landscape) {
+  if (!physicalLandscape) {
     landscapeReady = true;
 
     specialInstruction.textContent =
@@ -310,32 +333,75 @@ function updateMemoryOrientation() {
 
   if (landscapeReady) {
     unlockMemory();
-  } else {
-    specialInstruction.textContent =
-      'Hold your phone upright first, then rotate sideways.';
   }
+}
+
+async function startLandscapeSensor() {
+  if (!window.isSecureContext) {
+    showStatus('Motion sensors require HTTPS.');
+    return;
+  }
+
+  if (!('DeviceMotionEvent' in window)) {
+    showStatus('Motion sensor unavailable.');
+    return;
+  }
+
+  try {
+    // iOS permission request must follow a user gesture.
+    if (
+      typeof DeviceMotionEvent.requestPermission ===
+      'function'
+    ) {
+      const permission =
+        await DeviceMotionEvent.requestPermission();
+
+      if (permission !== 'granted') {
+        showStatus('Motion permission denied.');
+        return;
+      }
+    }
+
+    if (
+      activeInteraction !== 'landscape' ||
+      modal.classList.contains('hidden')
+    ) {
+      return;
+    }
+
+    stopLandscapeSensor();
+
+    landscapeSensorActive = true;
+
+    window.addEventListener(
+      'devicemotion',
+      onLandscapeMotion
+    );
+
+    specialInstruction.textContent =
+      'Rotate your phone sideways to reveal the memory.';
+
+  } catch (error) {
+    console.error(error);
+    showStatus('Unable to access motion sensor.');
+  }
+}
+
+function stopLandscapeSensor() {
+  if (landscapeSensorActive) {
+    window.removeEventListener(
+      'devicemotion',
+      onLandscapeMotion
+    );
+  }
+
+  landscapeSensorActive = false;
 }
 
 function checkLandscapeUnlock() {
   updateMemoryOrientation();
 }
 
-window.addEventListener(
-  'orientationchange',
-  updateMemoryOrientation
-);
-
-window.addEventListener(
-  'resize',
-  updateMemoryOrientation
-);
-
-if (screen.orientation?.addEventListener) {
-  screen.orientation.addEventListener(
-    'change',
-    updateMemoryOrientation
-  );
-}
 
 
 // =====================================
@@ -423,7 +489,11 @@ function cleanupInteraction() {
   stopMic();
   stopShake();
 
+
+  stopLandscapeSensor();
+  physicalLandscape = false;
   landscapeReady = false;
+  
 
   img.style.visibility = '';
   placeholder.style.visibility = '';
@@ -552,13 +622,14 @@ function openMemory(id, interaction = 'normal') {
   }
 
   else if (interaction === 'landscape') {
-    landscapeReady = !isLandscape();
+    landscapeReady = false;
+    physicalLandscape = false;
 
     specialInstruction.textContent =
       'Rotate your phone sideways to reveal this memory.';
 
     startInteractionButton.textContent =
-      'Check orientation';
+      'Enable orientation sensor';
 
     fallbackInteractionButton.textContent =
       'Reveal manually';
@@ -573,9 +644,19 @@ function openMemory(id, interaction = 'normal') {
   modal.classList.remove('hidden');
 
   if (interaction === 'landscape') {
-    requestAnimationFrame(checkLandscapeUnlock);
+    updateMemoryOrientation();
+
+    // On devices without explicit permission requirements,
+    // begin listening immediately.
+    if (
+      typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission !== 'function'
+    ) {
+      startLandscapeSensor();
+    }
   }
 }
+
 
 // =====================================
 // 10. MEMORY IMAGES
@@ -940,15 +1021,10 @@ startInteractionButton.onclick = () => {
   }
 
   if (activeInteraction === 'landscape') {
-    checkLandscapeUnlock();
-
-    if (!revealed) {
-      showStatus(
-        'Rotate your phone from portrait to landscape'
-      );
-    }
+    startLandscapeSensor();
   }
 };
+
 
 fallbackInteractionButton.onclick = () => {
   if (activeInteraction === 'shake') {

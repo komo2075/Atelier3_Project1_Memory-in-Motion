@@ -694,3 +694,22 @@ button {
     max-height: 45dvh;
   }
 }
+
+
+/*1.4 version */
+
+/* Physical landscape orientation while screen stays portrait */
+@media (orientation: portrait) {
+  #modal.memory-landscape #image-area {
+    width: min(86vh, 92vw);
+    max-width: none;
+    transform: rotate(90deg);
+    transform-origin: center center;
+    margin: 0 auto;
+  }
+
+  #modal.memory-portrait #image-area {
+    transform: none;
+  }
+}
+
