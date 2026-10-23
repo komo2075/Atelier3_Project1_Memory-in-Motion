@@ -304,6 +304,14 @@ function onLandscapeMotion(event) {
     // Detect left or right rotation
     landscapeDirection = x > 0 ? 1 : -1;
 
+
+    //1.4.2 version
+    console.log(
+      'Gravity X:', x,
+      'Landscape direction:', landscapeDirection
+    );
+
+
   } else if (
     absY > absX * 1.45 &&
     absY > 4.5
@@ -335,14 +343,15 @@ function updateMemoryOrientation() {
   );
 
 
+  //1.4.2 version
   //1.4.1 version
   // Remove previous direction classes
+  
   modal.classList.remove(
     'landscape-left',
     'landscape-right'
   );
 
-  // Apply detected direction
   if (physicalLandscape) {
     modal.classList.add(
       landscapeDirection === 1
@@ -350,6 +359,22 @@ function updateMemoryOrientation() {
         : 'landscape-left'
     );
   }
+
+  // Rotate the image according to physical orientation.
+  // Only rotate manually if the browser is still portrait.
+  const screenIsPortrait = window.matchMedia(
+    '(orientation: portrait)'
+  ).matches;
+
+  if (physicalLandscape && screenIsPortrait) {
+    imageArea.style.transform =
+      landscapeDirection === 1
+        ? 'rotate(90deg)'
+        : 'rotate(-90deg)';
+  } else {
+    imageArea.style.transform = 'none';
+  }
+
 
 
 
@@ -540,6 +565,11 @@ function cleanupInteraction() {
 
   //1.4.1 version
   landscapeDirection = 0;
+
+
+  //1.4.2 version
+  imageArea.style.transform = 'none';
+
 
   modal.classList.remove(
     'landscape-left',
