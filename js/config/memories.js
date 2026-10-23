@@ -29,7 +29,7 @@ export const memories = {
 
   memory04: {
     title: "Flower & You",
-    date: "October 17th, 2026",
+    date: "August 17th, 2026",
 
     images: [
       "./assets/memories/004/photo1.jpg",
@@ -69,7 +69,7 @@ memory06: {
 
 memory07: {
   title: "The course we met",
-  date: "March 2025",
+  date: "Winter term 2025",
 
   images: [
     "./assets/memories/007/photo1.jpg",
@@ -115,16 +115,15 @@ memory10: {
   text: "We’re studying together—you’re learning CAD, and I’m doing some freelance work creating AIGC videos."
 },
 
-memory10: {
-  title: "Study together",
-  date: "May 22th, 2026",
+memory11: {
+  title: "Meet up",
+  date: "July 2nd, 2026",
 
   images: [
-    "./assets/memories/010/photo1.jpg",
-    "./assets/memories/010/photo2.jpg"
+    "./assets/memories/011/photo1.jpg"
   ],
 
-  text: "We’re studying together—you’re learning CAD, and I’m doing some freelance work creating AIGC videos."
+  text: "And then go grab a bite and do some shopping."
 },
 
 
