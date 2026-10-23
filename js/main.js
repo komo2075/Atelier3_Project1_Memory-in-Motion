@@ -1378,37 +1378,43 @@ renderer.domElement.addEventListener(
 // =====================================
 
 
-if (motionEnabled) {
 
-  // Smooth angles, not camera distance.
-  motionTheta +=
-    (targetTheta - motionTheta) * 0.13;
+ // =====================================
+ // 20. RENDER LOOP
+ // =====================================
 
-  motionPhi +=
-    (targetPhi - motionPhi) * 0.13;
+function draw() {
+  requestAnimationFrame(draw);
 
-  // Always use the exact locked radius.
-  const direction = new THREE.Vector3()
-    .setFromSphericalCoords(
-      1,
-      motionPhi,
-      motionTheta
-    );
+  if (motionEnabled) {
 
-  camera.position
-    .copy(controls.target)
-    .addScaledVector(
-      direction,
-      motionDistance
-    );
+    // Smooth camera angles only.
+    motionTheta +=
+      (targetTheta - motionTheta) * 0.13;
 
-  camera.lookAt(controls.target);
+    motionPhi +=
+      (targetPhi - motionPhi) * 0.13;
 
-} else {
-  controls.update();
-}
+    // Fixed camera distance.
+    const direction = new THREE.Vector3()
+      .setFromSphericalCoords(
+        1,
+        motionPhi,
+        motionTheta
+      );
 
+    camera.position
+      .copy(controls.target)
+      .addScaledVector(
+        direction,
+        motionDistance
+      );
 
+    camera.lookAt(controls.target);
+
+  } else {
+    controls.update();
+  }
 
   camera.updateMatrixWorld();
 
@@ -1447,8 +1453,10 @@ if (motionEnabled) {
   }
 
   renderer.render(scene, camera);
+}
 
 draw();
+
 
 // =====================================
 // 21. RESIZE
