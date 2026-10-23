@@ -12,6 +12,8 @@ export const points = [
   { id: 'point09', position: { x: -1.9, y: 1.70, z: -2.17 }, memoryId: 'memory09' },
   { id: 'point10', position: { x: -4.22, y: 0.9, z: -0.52 }, memoryId: 'memory10' },
   { id: 'point11', position: { x: -0.58, y: 0.40, z: -7.94 }, memoryId: 'memory11' },
+  { id: 'point12', position: { x: 3.47, y: 0.40, z: -4.92 }, memoryId: 'memory12' },
+  { id: 'point13', position: { x: -8.57, y: 0.40, z: -10.00 }, memoryId: 'memory13' },
 
 
   //special interactions

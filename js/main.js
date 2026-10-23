@@ -1053,10 +1053,10 @@ async function startBlow() {
 
       last = now;
 
-      if (rms > 0.075) {
-        progress += dt * 0.48;
+      if (rms > 0.025) {
+        progress += dt * 1.2;
       } else {
-        progress -= dt * 0.10;
+        progress -= dt * 0.05;
       }
 
       progress = Math.max(

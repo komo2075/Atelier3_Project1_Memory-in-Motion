@@ -126,6 +126,28 @@ memory11: {
   text: "And then go grab a bite and do some shopping."
 },
 
+memory12: {
+  title: "Cafeteria",
+  date: "May 22th, 2026",
+
+  images: [
+    "./assets/memories/012/photo1.jpg"
+  ],
+
+  text: "You like coffee, and I like fruit tea."
+},
+
+memory13: {
+  title: "Summer",
+  date: "2026",
+
+  images: [
+    "./assets/memories/013/photo1.jpg"
+  ],
+
+  text: "Even the summer breeze carries the tenderness of spring."
+},
+
 
 
   // Special memory content. Replace image paths and text with your own photos.
