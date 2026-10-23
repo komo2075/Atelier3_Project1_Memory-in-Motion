@@ -1079,11 +1079,23 @@ function showStatus(message) {
 // 18. GYROSCOPE CAMERA CONTROL
 // =====================================
 
+
+ // =====================================
+ // 18. GYROSCOPE CAMERA CONTROL
+ // ROTATION ONLY - NO ZOOM
+ // =====================================
+
 let motionEnabled = false;
 let base = null;
-let lastAngles = null;
 
 const rad = Math.PI / 180;
+
+// Fixed camera distance during motion
+let motionDistance = null;
+
+// Current camera angles
+let motionTheta = 0;
+let motionPhi = 0;
 
 function wrapDelta(a, b) {
   return ((a - b + 540) % 360) - 180;
@@ -1106,14 +1118,10 @@ function onOrientation(event) {
     gamma: event.gamma
   };
 
+  // First sensor reading: calibration
   if (!base) {
     base = current;
-    lastAngles = current;
-
-    showStatus(
-      'Motion calibrated. Rotate your phone.'
-    );
-
+    showStatus('Motion calibrated. Rotate your phone.');
     return;
   }
 
@@ -1145,37 +1153,28 @@ function onOrientation(event) {
     0.75
   );
 
-  const distance = camera.position.distanceTo(
-    controls.target
-  );
+  // Update angles only.
+  // Distance is never calculated from sensor movement.
+  motionTheta = 0.64 + azimuth;
 
-  const theta = 0.64 + azimuth;
-
-  const phi = THREE.MathUtils.clamp(
+  motionPhi = THREE.MathUtils.clamp(
     0.9 + elevation,
     0.2,
     1.45
   );
-
-  const target = new THREE.Vector3()
-    .setFromSphericalCoords(
-      distance,
-      phi,
-      theta
-    )
-    .add(controls.target);
-
-  camera.position.lerp(target, 0.13);
-  camera.lookAt(controls.target);
-
-  lastAngles = current;
 }
+
+// =====================================
+// MOTION BUTTON
+// =====================================
 
 const motionButton = document.querySelector(
   '#motion-button'
 );
 
 motionButton.onclick = async () => {
+
+  // Disable motion
   if (motionEnabled) {
     motionEnabled = false;
 
@@ -1185,7 +1184,11 @@ motionButton.onclick = async () => {
     );
 
     motionButton.textContent = 'Enable motion';
+
     controls.enabled = true;
+
+    // Synchronize OrbitControls with current camera.
+    controls.update();
 
     showStatus('Motion disabled');
     return;
@@ -1197,9 +1200,7 @@ motionButton.onclick = async () => {
   }
 
   if (!('DeviceOrientationEvent' in window)) {
-    showStatus(
-      'Device motion not supported by this browser'
-    );
+    showStatus('Device motion not supported');
     return;
   }
 
@@ -1217,8 +1218,21 @@ motionButton.onclick = async () => {
       }
     }
 
+    // Lock current camera distance once.
+    motionDistance = camera.position.distanceTo(
+      controls.target
+    );
+
+    const spherical = new THREE.Spherical().setFromVector3(
+      camera.position.clone().sub(controls.target)
+    );
+
+    motionTheta = spherical.theta;
+    motionPhi = spherical.phi;
+
     base = null;
     motionEnabled = true;
+
     controls.enabled = false;
 
     window.addEventListener(
@@ -1228,25 +1242,41 @@ motionButton.onclick = async () => {
 
     motionButton.textContent = 'Disable motion';
 
-    showStatus('Move your phone to calibrate');
+    showStatus('Motion enabled. Distance locked.');
 
   } catch (error) {
     console.error(error);
-
     showStatus('Could not enable device motion');
   }
 };
 
+
+
+//1.3 version
+// =====================================
+// RESET BUTTON
+// =====================================
 document.querySelector('#reset-button').onclick = () => {
   resetView();
   base = null;
 
-  showStatus(
-    motionEnabled
-      ? 'View reset; hold phone at starting angle'
-      : 'View reset'
-  );
+  if (motionEnabled) {
+    motionDistance = camera.position.distanceTo(
+      controls.target
+    );
+
+    const spherical = new THREE.Spherical().setFromVector3(
+      camera.position.clone().sub(controls.target)
+    );
+
+    motionTheta = spherical.theta;
+    motionPhi = spherical.phi;
+  }
+
+  showStatus('View reset');
 };
+
+
 
 // =====================================
 // 19. DEBUG POSITION PICKER
@@ -1314,9 +1344,39 @@ renderer.domElement.addEventListener(
 function draw() {
   requestAnimationFrame(draw);
 
-  if (!motionEnabled) {
-    controls.update();
-  }
+//1.3 version
+  // Update camera position and rotation based on motion or controls.
+if (motionEnabled) {
+
+  // Build target camera position using locked distance.
+  const targetPosition = new THREE.Vector3()
+    .setFromSphericalCoords(
+      motionDistance,
+      motionPhi,
+      motionTheta
+    )
+    .add(controls.target);
+
+  // Smooth camera rotation.
+  camera.position.lerp(targetPosition, 0.13);
+
+  // Force exact camera distance.
+  const direction = camera.position
+    .clone()
+    .sub(controls.target)
+    .normalize();
+
+  camera.position.copy(controls.target).addScaledVector(
+    direction,
+    motionDistance
+  );
+
+  camera.lookAt(controls.target);
+
+} else {
+  controls.update();
+}
+
 
   camera.updateMatrixWorld();
 
