@@ -73,9 +73,115 @@
       <p id="memory-text"></p>
     </article>
   </div>
-  <div id="help-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
-    <div class="backdrop" data-close-help="true"></div><article class="memory-card help-card"><button id="close-help" class="close" aria-label="Close">×</button><div class="eyebrow">HOW TO EXPLORE</div><h2 id="help-title">Find your memories</h2><p>Rotate the campus with your mouse or touch. On a supported phone, tap Enable motion and rotate your device to explore. Tap a glowing dot to open a memory. Reset view recenters the camera.</p><p>Developers: use <code>?debug=true</code> to click the ground and copy coordinates. Configure points in <code>js/config/points.js</code> and content in <code>js/config/memories.js</code>.</p></article>
-  </div>
+  
+<!-- ABOUT THE PROJECT MODAL -->
+<div id="help-modal" class="modal hidden">
+
+  <div class="backdrop" data-close-help="true"></div>
+
+  <article class="memory-card about-card">
+
+    <button
+      id="close-help"
+      class="close-btn"
+      type="button"
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+    <div class="about-label">
+      INTERACTIVE DIGITAL ARCHIVE
+    </div>
+    <h2>Memory in Motion</h2>
+    <p class="about-subtitle">
+      An Interactive 3D Spatial Memory Archive
+    </p>
+
+    <h3>About the Project</h3>
+
+    <p>
+      Memory in Motion is an interactive 3D memory archive
+      that explores the relationship between technology,
+      physical space, and personal memory.
+    </p>
+
+    <p>
+      The project transforms a familiar campus environment
+      into a digital space for remembering. Instead of
+      organizing photographs in a traditional album,
+      I use a 3D campus model as a spatial interface.
+      Memory points are placed at different locations
+      in the environment. Each point connects a physical
+      place with photographs and experiences from my
+      time with friends and classmates.
+    </p>
+
+    <p>
+      The project uses different forms of interaction
+      to explore different ways of accessing memories.
+      Users can navigate the 3D environment by moving
+      their phones with the gyroscope. They can also
+      interact with selected memories by rotating
+      their phones, blowing into the microphone,
+      or shaking the device.
+    </p>
+
+    <p>
+      These actions turn everyday phone functions into
+      tools for discovering and revealing memories.
+      Through this design, I explore the possibility
+      of using mobile technology to create a more
+      physical and spatial experience of remembering.
+    </p>
+
+    <h3>How to Interact</h3>
+
+    <div class="about-instructions">
+
+      <p>
+        <strong>01. Explore the Map</strong>
+        Drag the screen or enable motion control
+        to explore the 3D campus.
+      </p>
+
+      <p>
+        <strong>02. Discover Memories</strong>
+        Select the floating memory points to open
+        photographs connected to different locations.
+      </p>
+
+      <p>
+        <strong>03. Rotate to Reveal</strong>
+        Turn your phone sideways to unlock
+        a hidden memory.
+      </p>
+
+      <p>
+        <strong>04. Blow to Reveal</strong>
+        Blow gently toward the microphone
+        to clear the mist covering a photograph.
+      </p>
+
+      <p>
+        <strong>05. Shake to Remember</strong>
+        Shake your phone to reveal another moment.
+      </p>
+
+      <p>
+        <strong>06. Show or Hide Points</strong>
+        Use the eye icon to control the visibility
+        of memory points.
+      </p>
+
+    </div>
+
+  </article>
+
+</div>
+
+
+
   <div id="debug-panel" class="debug-panel hidden"><strong>DEBUG · position picker</strong><p>Click the ground or model to copy a world position.</p><code id="debug-coords">Waiting for click…</code></div>
   <script type="importmap">
     {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}
