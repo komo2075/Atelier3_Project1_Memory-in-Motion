@@ -1045,6 +1045,14 @@ async function startBlow() {
 
       //1.6.1 version
       const rms = Math.sqrt(sum / samples.length);
+      console.log(
+        "MIC DEBUG",
+        "RMS:", rms.toFixed(5),
+        "Audio:", audioContext?.state,
+        "Track:", microphoneStream?.getAudioTracks()[0]?.readyState
+      );
+
+
       //1.5.3 version
       
       const dt = Math.min((now - last) / 1000, 0.06);
